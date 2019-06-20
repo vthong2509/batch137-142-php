@@ -39,7 +39,6 @@
     
     if (isset($_POST['register'])) {
       $username = $_POST['username'];
-      $password = md5($_POST['password']);
       $city     = $_POST['city'];
       $gender   = isset($_POST['gender'])?$_POST['gender']:NULL;
       $avatar   = $_FILES['avatar'];  
@@ -60,7 +59,6 @@
   <div class="register-logo">
     <a href="../../index2.html"><b>Admin</b>LTE</a>
   </div>
-
   <div class="register-box-body">
     <p class="login-box-msg">Register a new membership</p>
 
@@ -85,7 +83,7 @@
       </div> 
       <div class="form-group">
         <label for="exampleInputFile">Avatar</label>
-        <input type="file" id="exampleInputFile" name="avatar">
+        <input type="file" id="exampleInputFile" name="avatar"  <?php echo $edit_user['avatar'] ?> >
       </div>
       <div class="row">
         <!-- /.col -->

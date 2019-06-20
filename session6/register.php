@@ -26,23 +26,65 @@
 
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+  <style type="text/css">
+		.error {
+			color: red;
+		}
+	</style>
 </head>
 <body class="hold-transition register-page">
 <div class="register-box">
   <?php include_once 'connect.php';?>
   <?php 
+    $errUserName = $errPassword = $errGender = $errCity =$errAvatar= '';
+    $checkRegister = true;
     if (isset($_POST['register'])) {
       $username = $_POST['username'];
-      $password = md5($_POST['password']);
+      $password = $_POST['password'];
       $city     = $_POST['city'];
       $gender   = isset($_POST['gender'])?$_POST['gender']:NULL;
       $avatar   = $_FILES['avatar'];  
-
-      if ($username != '' && $password != '' && $city != ''
-          && $gender != '' && $avatar['error'] == 0) {
-       
+      if ($username == '') {
+				$errUserName  = 'Please input your username';
+				$checkRegister = false;
+			} else {
+				$errUserName = '';
+			}
+			if ($password == '') {
+				$errPassword  = 'Please input your password';
+				$checkRegister = false;
+			} else {
+				$errPassword = '';
+			}
+			if ($gender == NULL) {
+				$errGender  = 'Please choose your gender';
+				$checkRegister = false;
+			} else {
+				$errGender = '';
+			}
+			if ($city == '') {
+				$errCity  = 'Please choose your city';
+				$checkRegister = false;
+			} else {
+				$errCity = '';
+      }
+      $sql1 = "SELECT *  FROM users WHERE username = '$username'";
+      $result = mysqli_query($connect, $sql1);
+      if ($result->num_rows > 0){
+        $errUserName  ='Username already exists';
+        $checkRegister = false;
+      } else {
+           // no data matched
+           $errUserName  ='';
+      }     
+      if($_FILES['avatar']['error']==0){
         $avatarName = uniqid().'_'.$avatar['name'];
         move_uploaded_file($avatar['tmp_name'], 'uploads/avatar/'.$avatarName);
+      } else {
+        $avatarName='default.png';
+      }
+      if ($checkRegister) {
+        $password = md5($_POST['password']);
         $sql = "INSERT INTO users(username, password, city, gender, avatar)
         VALUES('$username', '$password', '$city', '$gender', '$avatarName')";
          if (mysqli_query($connect, $sql) === TRUE) {
@@ -63,14 +105,17 @@
         <input type="text" name="username" class="form-control" placeholder="Username">
         <span class="glyphicon glyphicon-user form-control-feedback"></span>
       </div>
+      <p class="error"><?php echo $errUserName;?></p>
       <div class="form-group has-feedback">
         <input type="password" name="password" class="form-control" placeholder="Password">
         <span class="glyphicon glyphicon-lock form-control-feedback"></span>
       </div>
+      <p class="error"><?php echo $errPassword;?></p>
       <div class="form-group has-feedback">
         <input type="radio" name="gender" value="male"> Male
         <input type="radio" name="gender" value="female"> Female
       </div>
+      <p class="error"><?php echo $errGender;?></p>
       <div class="form-group">
         <label>City</label>
         <select class="form-control" name="city">
@@ -80,11 +125,13 @@
           <option value="danang">Da Nang</option>
           <option value="quangnam">Quang Nam</option>
         </select>
+        <p class="error"><?php echo $errCity;?></p>
       </div> 
       <div class="form-group">
         <label for="exampleInputFile">Avatar</label>
-        <input type="file" id="exampleInputFile" name="avatar">
+        <input type="file" id="exampleInputFile" name="avatar" value ="default.png">
       </div>
+      <p class="error"><?php echo $errAvatar;?></p>
       <div class="row">
         <!-- /.col -->
         <div class="col-xs-4">
