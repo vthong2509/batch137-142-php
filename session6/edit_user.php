@@ -36,18 +36,38 @@
     $edit_user = $result->fetch_assoc()	;
   ?>
   <?php 
-    
+    $errUserName = $errGender = $errCity =$errAvatar= '';
+    $checkRegister = true;
     if (isset($_POST['register'])) {
       $username = $_POST['username'];
       $city     = $_POST['city'];
       $gender   = isset($_POST['gender'])?$_POST['gender']:NULL;
       $avatar   = $_FILES['avatar'];  
-
-      if ($username != '' && $city != ''
-          && $gender != '' && $avatar['error'] == 0) {
-       
+      if ($username == '') {
+        $errUserName  = 'Please input your username';
+        $checkRegister = false;
+    } else {
+        $errUserName = '';
+    }
+    if ($gender == NULL) {
+        $errGender  = 'Please choose your gender';
+        $checkRegister = false;
+    } else {
+        $errGender = '';
+    }
+    if ($city == '') {
+        $errCity  = 'Please choose your city';
+        $checkRegister = false;
+    } else {
+        $errCity = '';
+    }
+      if($_FILES['avatar']['error']==0){
         $avatarName = uniqid().'_'.$avatar['name'];
         move_uploaded_file($avatar['tmp_name'], 'uploads/avatar/'.$avatarName);
+      } else {
+        $avatarName=$edit_user['avatar'];
+      }
+      if ($checkRegister) {
         $sql1 = "UPDATE users set username = '$username' , city = '$city', gender ='$gender', avatar = '$avatarName'
         where id = $id ";
          if (mysqli_query($connect, $sql1) === TRUE) {
@@ -67,10 +87,12 @@
         <input type="text" name="username" class="form-control" placeholder="Username" value ="<?php echo $edit_user['username'] ?>">
         <span class="glyphicon glyphicon-user form-control-feedback"></span>
       </div>
+      <p class="error"><?php echo $errUserName;?></p>
       <div class="form-group has-feedback">
         <input type="radio" name="gender" value="male" <?php echo ($edit_user['gender']== 'male' )?"checked":'' ?>> Male
         <input type="radio" name="gender" value="female" <?php echo ($edit_user['gender']== 'female' )?"checked":'' ?>> Female
       </div>
+      <p class="error"><?php echo $errGender;?></p>
       <div class="form-group">
         <label>City</label>
         <select class="form-control" name="city">
@@ -80,10 +102,13 @@
           <option value="danang" <?php echo ($edit_user['city']== 'danang' )?"selected":'' ?> >Da Nang</option>
           <option value="quangnam" <?php echo ($edit_user['city']== 'quangnam' )?"selected":'' ?> >Quang Nam</option>
         </select>
+        <p class="error"><?php echo $errCity;?></p>
       </div> 
       <div class="form-group">
         <label for="exampleInputFile">Avatar</label>
-        <input type="file" id="exampleInputFile" name="avatar"  <?php echo $edit_user['avatar'] ?> >
+        <img width="100%" class="thumbnail" src="uploads/avatar/<?php echo $edit_user['avatar']?>" alt="">
+        <p>Do you want to change your avatar</p>
+        <input type="file" id="exampleInputFile" name="avatar"   >
       </div>
       <div class="row">
         <!-- /.col -->
